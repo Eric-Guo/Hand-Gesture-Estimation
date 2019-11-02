@@ -51,7 +51,7 @@ async function setup(){
 		else
 			saveExamples(pose, numOfExamples);
 	});
-	predictB.click(predict);
+	predictB.click(do_predict);
 	predictC.click(() => {
 		if(predictC.is(':checked')){
 			predictFrameD = $(document.getElementById('predictFrame'));
@@ -91,14 +91,14 @@ async function draw(){
 	filter(INVERT);
 	if(predictFrame){
 		if(count%60 == 0){
-			await predict();
+			await do_predict();
 			count = 0;
 		}
 		count++;
 	}
 }
 
-async function predict(){
+async function do_predict(){
 	let x = await createWebcamTensor();
 	let activation = await mobilenet.predict(x);
 	let y = tf.tidy(() => model.predict(activation).argMax(1));
