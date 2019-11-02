@@ -94,7 +94,7 @@ async function draw(){
 	filter(THRESHOLD,thresholdVal);
 	filter(INVERT);
 	if(predictFrame){
-		if(count%60 == 0){
+		if(count%60 == 0 && mobilenet !== undefined){
 			await do_predict();
 			count = 0;
 		}
