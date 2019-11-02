@@ -64,7 +64,8 @@ async function setup(){
 		}
 	});
 	threshold.on('input', () => {
-	   thresholdVal = parseFloat(threshold.val());
+		thresholdVal = parseFloat(threshold.val());
+		messageP.html('thresholdVal: '+ thresholdVal);
 	});
 	capture.elt.addEventListener('loadedmetadata', () => {
 		// Drawing the webcam element
