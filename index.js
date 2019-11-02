@@ -29,7 +29,13 @@ async function setup(){
 	predictP = $(document.getElementById('predictP'));
 	predictB = $(document.getElementById('predictB'));
 	predictC = $(document.getElementById('predictC'));
-	predictFrame = false;
+	predictFrameD = $(document.getElementById('predictFrame'));
+	predictFrame = true;
+
+	if (predictFrame == true) {
+		predictC.prop('checked', true);
+		predictFrameD.hide();
+	}
 	threshold = $(document.getElementById('threshold'));
 	thresholdVal = parseFloat(threshold.val());
 	count = 0;
@@ -54,11 +60,9 @@ async function setup(){
 	predictB.click(do_predict);
 	predictC.click(() => {
 		if(predictC.is(':checked')){
-			predictFrameD = $(document.getElementById('predictFrame'));
 			predictFrameD.hide();
 			predictFrame = true;
 		}else{
-			predictFrameD = $(document.getElementById('predictFrame'));
 			predictFrameD.show();
 			predictFrame = false;
 		}
