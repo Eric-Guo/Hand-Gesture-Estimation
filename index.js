@@ -155,7 +155,6 @@ class ObjectDetection {
   }
 
   async load() {
-    this.fps = 0
     this.model = await tf.loadFrozenModel(this.modelPath, this.weightPath);
 
     // Warmup the model.
@@ -167,7 +166,6 @@ class ObjectDetection {
 
   async detect(input) {
 
-    let timeBegin = Date.now()
     const [height, width] = getInputTensorDimensions(input);
     const resizedHeight = getValidResolution(this.modelParams.imageScaleFactor, height, this.modelParams.outputStride);
     const resizedWidth = getValidResolution(this.modelParams.imageScaleFactor, width, this.modelParams.outputStride);
@@ -182,10 +180,8 @@ class ObjectDetection {
     })
 
     // const result = await this.model.executeAsync(batched);
-    self = this
+    self = this;
     return this.model.executeAsync(batched).then(function (result) {
-
-
       const scores = result[0].dataSync()
       const boxes = result[1].dataSync()
 
@@ -225,11 +221,8 @@ class ObjectDetection {
         indexes,
         classes
       )
-      let timeEnd = Date.now()
-      self.fps = Math.round(1000 / (timeEnd - timeBegin))
 
-      return predictions
-
+      return predictions;
     })
 
   }
