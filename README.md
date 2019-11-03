@@ -21,6 +21,13 @@ As of now, the model only recognizes 5 signs, 2 letters namely `A` and `Y` and 3
 
 Click [here](https://mohammed-shoaib.github.io/Hand-Gesture-Estimation/) to check out the live version.
 
+# Run the frontend code
+
+```bash
+open http://localhost:3000/index.html
+python -m SimpleHTTPServer 3000
+```
+
 # Run The Code
 
 Extract the `Images` zip file in the `data` folder and then run the following commands on the terminal:
