@@ -3,7 +3,7 @@ let mobilenet, model, capture;
 let messageP, saveExamplesB;
 let predictB, predictP, predictC, predictFrame;
 let threshold, thresholdVal;
-let count;
+let count, countTrack;
 
 const NUM_CLASSES = 5
 const MAPPING = {'A': 0, 'OKAY': 1, 'PEACE': 2, 'THUMBS UP': 3, 'Y': 4}
@@ -94,15 +94,26 @@ async function setup(){
 async function draw(){
 	background(0);
 	image(capture,0,0);
+	if(predictFrame) {
+		if(countTrack%60 == 0 && modelHand !== undefined){
+			await do_track();
+			count = 0;
+		}
+		count++;
+	}
 	filter(THRESHOLD,thresholdVal);
 	filter(INVERT);
 	if(predictFrame){
-		if(count%60 == 0 && mobilenet !== undefined){
+		if(count%60 == 0 && modelHand !== undefined && mobilenet !== undefined){
 			await do_predict();
 			count = 0;
 		}
 		count++;
 	}
+}
+
+async function do_track(){
+
 }
 
 async function do_predict(){
