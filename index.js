@@ -10,6 +10,8 @@ const MAPPING = {'A': 0, 'OKAY': 1, 'PEACE': 2, 'THUMBS UP': 3, 'Y': 4}
 const IMG_WIDTH = 224;
 const IMG_HEIGHT = 224;
 
+const basePath = "https://cdn.jsdelivr.net/npm/handtrackjs/models/web/"
+
 async function setup(){
 	// To have uniformity for pixels across multiple devices
 	pixelDensity(1);
@@ -116,8 +118,6 @@ async function do_predict(){
 	y.dispose();
 }
 
-
-
 // Helper functions
 
 // Returns a model that outputs an internal activation.
@@ -125,6 +125,133 @@ async function loadMobileNet(){
 	const mobilenet = await tf.loadModel('https://storage.googleapis.com/tfjs-models/tfjs/mobilenet_v1_0.25_224/model.json');
 	const layer = mobilenet.getLayer('conv_pw_13_relu');
 	return tf.model({inputs: mobilenet.inputs, outputs: layer.output});
+}
+
+class ObjectDetection {
+  constructor(modelParams) {
+    this.modelPath = basePath + modelParams.modelType + "/tensorflowjs_model.pb";
+    this.weightPath = basePath + modelParams.modelType + "/weights_manifest.json";
+    this.modelParams = {
+		  flipHorizontal: true,
+		  outputStride: 16,
+		  imageScaleFactor: 0.7,
+		  maxNumBoxes: 2,
+		  iouThreshold: 0.5,
+		  scoreThreshold: 0.99,
+		  modelType: "ssdlitemobilenetv2"
+		}
+  }
+
+  async load() {
+    this.fps = 0
+    this.model = await tf.loadFrozenModel(this.modelPath, this.weightPath);
+
+    // Warmup the model.
+    const result = await this.model.executeAsync(tf.zeros([1, 300, 300, 3]));
+    result.map(async (t) => await t.data());
+    result.map(async (t) => t.dispose());
+    // console.log("model loaded and warmed up")
+  }
+
+  async detect(input) {
+
+    let timeBegin = Date.now()
+    const [height, width] = getInputTensorDimensions(input);
+    const resizedHeight = getValidResolution(this.modelParams.imageScaleFactor, height, this.modelParams.outputStride);
+    const resizedWidth = getValidResolution(this.modelParams.imageScaleFactor, width, this.modelParams.outputStride);
+
+    const batched = tf.tidy(() => {
+      const imageTensor = tf.fromPixels(input)
+      if (this.modelParams.flipHorizontal) {
+        return imageTensor.reverse(1).resizeBilinear([resizedHeight, resizedWidth]).expandDims(0);
+      } else {
+        return imageTensor.resizeBilinear([resizedHeight, resizedWidth]).expandDims(0);
+      }
+    })
+
+    // const result = await this.model.executeAsync(batched);
+    self = this
+    return this.model.executeAsync(batched).then(function (result) {
+
+
+      const scores = result[0].dataSync()
+      const boxes = result[1].dataSync()
+
+      // clean the webgl tensors
+      batched.dispose()
+      tf.dispose(result)
+
+      // console.log("scores result",scores, boxes)
+
+      const [maxScores, classes] = calculateMaxScores(scores, result[0].shape[1], result[0].shape[2]);
+      const prevBackend = tf.getBackend()
+      // run post process in cpu
+      tf.setBackend('cpu')
+      const indexTensor = tf.tidy(() => {
+        const boxes2 = tf.tensor2d(boxes, [
+          result[1].shape[1],
+          result[1].shape[3]
+        ])
+        return tf.image.nonMaxSuppression(
+          boxes2,
+          scores,
+          self.modelParams.maxNumBoxes, // maxNumBoxes
+          self.modelParams.iouThreshold, // iou_threshold
+          self.modelParams.scoreThreshold // score_threshold
+        )
+      })
+      const indexes = indexTensor.dataSync()
+      indexTensor.dispose()
+      // restore previous backend
+      tf.setBackend(prevBackend)
+
+      const predictions = self.buildDetectedObjects(
+        width,
+        height,
+        boxes,
+        scores,
+        indexes,
+        classes
+      )
+      let timeEnd = Date.now()
+      self.fps = Math.round(1000 / (timeEnd - timeBegin))
+
+      return predictions
+
+    })
+
+  }
+
+  buildDetectedObjects(width, height, boxes, scores, indexes, classes) {
+    const count = indexes.length
+    const objects = []
+    for (let i = 0; i < count; i++) {
+      const bbox = []
+      for (let j = 0; j < 4; j++) {
+        bbox[j] = boxes[indexes[i] * 4 + j]
+      }
+      const minY = bbox[0] * height
+      const minX = bbox[1] * width
+      const maxY = bbox[2] * height
+      const maxX = bbox[3] * width
+      bbox[0] = minX
+      bbox[1] = minY
+      bbox[2] = maxX - minX
+      bbox[3] = maxY - minY
+      objects.push({
+        bbox: bbox,
+        class: classes[indexes[i]],
+        score: scores[indexes[i]]
+      })
+    }
+    return objects
+  }
+
+  dispose() {
+    if (this.model) {
+      this.model.dispose();
+    }
+  }
 }
 
 // Function to save the canvas as example for training the model
