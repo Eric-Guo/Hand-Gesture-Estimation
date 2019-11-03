@@ -104,7 +104,7 @@ async function draw(){
 	filter(THRESHOLD,thresholdVal);
 	filter(INVERT);
 	if(predictFrame){
-		if(count%60 == 0 && mobilenet !== undefined){
+		if(count%60 == 0 && modelHand !== undefined && mobilenet !== undefined){
 			await do_predict();
 			count = 0;
 		}
@@ -161,7 +161,8 @@ class ObjectDetection {
     const result = await this.model.executeAsync(tf.zeros([1, 300, 300, 3]));
     result.map(async (t) => await t.data());
     result.map(async (t) => t.dispose());
-    // console.log("model loaded and warmed up")
+    // console.log("modelHand loaded and warmed up")
+    return this.model;
   }
 
   async detect(input) {
