@@ -20,25 +20,32 @@
 	<body>
 		<div class='container-fluid'>
 			<div class='row'>
-				<div class='col-xs-12 col-md-4' id='canvas-container'></div>
-				<div class='col-xs-12 col-md-4' id='content'>
-					<p id='messageP'></p><br/>
-					<p>Adjust Lighting: </p>
-					<input type='range' id='threshold' value=0.30 min=0 max=1 step=0.01><br/>
-					<div id='predictFrame'>
-						<!-- <p>Pose: </p>
-						<input type='text' class='form-control' id='pose' value='A' style="text-transform:uppercase" pattern='[A-Z]'>
-						<p>Number of Examples: </p>
-						<input type='number' class='form-control' id='numOfExamples' value=100 min=1 oninput="validity.valid||(value='');"><br/>
-						<button type='button' class='btn btn-primary' id='saveExamplesB'>Save Examples</button><br/> -->
-						<button type='button' class='btn btn-primary' id='predictB'>Predict</button><br/>
-					</div>
-					<h2 id='predictP'>Prediction: No Prediction</h2><br/>
-					<label><input class='checkbox' type='checkbox' id='predictC'>Predict every frame</label>
-				</div>
-				<div class='col-xs-12 col-md-4' id='webcam-container'></div>
+        <div className="col-md-7">
+					<div class="jumbotron">
+				    <h1 id='predictP'>Prediction: No Prediction</h1>
+				  </div>
+        </div>
+        <div className="col-md-5">
+          <div class='row'>
+						<div class='col-md-12' id='webcam-container'></div>
+						<div class='col-md-12' id='canvas-container'></div>
+						<div class='col-md-12' id='content'>
+							<p id='messageP'></p><br/>
+							<p>Adjust Lighting: </p>
+							<input type='range' id='threshold' value=0.30 min=0 max=1 step=0.01><br/>
+							<div id='predictFrame'>
+								<!-- <p>Pose: </p>
+								<input type='text' class='form-control' id='pose' value='A' style="text-transform:uppercase" pattern='[A-Z]'>
+								<p>Number of Examples: </p>
+								<input type='number' class='form-control' id='numOfExamples' value=100 min=1 oninput="validity.valid||(value='');"><br/>
+								<button type='button' class='btn btn-primary' id='saveExamplesB'>Save Examples</button><br/> -->
+								<button type='button' class='btn btn-primary' id='predictB'>Predict</button><br/>
+							</div>
+							<label><input class='checkbox' type='checkbox' id='predictC'>Predict every frame</label>
+						</div>
+          </div>
+        </div>
 			</div>
 		</div>
 	</body>
-
 </html>
