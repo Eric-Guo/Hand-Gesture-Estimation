@@ -1,5 +1,5 @@
 let cnv, size;
-let mobilenet, model, capture;
+let mobilenet, model, modelHand, capture;
 let messageP, saveExamplesB;
 let predictB, predictP, predictC, predictFrame;
 let threshold, thresholdVal;
@@ -97,14 +97,14 @@ async function draw(){
 	if(predictFrame) {
 		if(countTrack%60 == 0 && modelHand !== undefined){
 			await do_track();
-			count = 0;
+			countTrack = 0;
 		}
-		count++;
+		countTrack++;
 	}
 	filter(THRESHOLD,thresholdVal);
 	filter(INVERT);
 	if(predictFrame){
-		if(count%60 == 0 && modelHand !== undefined && mobilenet !== undefined){
+		if(count%60 == 0 && mobilenet !== undefined){
 			await do_predict();
 			count = 0;
 		}
