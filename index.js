@@ -46,6 +46,7 @@ async function setup(){
 	messageP.html('Loading the model...');
 	mobilenet = await loadMobileNet();
 	model = await tf.loadModel('./Model/model.json');
+	modelHand = await loadHandtrack();
 	messageP.html('Model Loaded.');
 
 	// Defining the properties of elements
@@ -128,9 +129,7 @@ async function loadMobileNet(){
 }
 
 class ObjectDetection {
-  constructor(modelParams) {
-    this.modelPath = basePath + modelParams.modelType + "/tensorflowjs_model.pb";
-    this.weightPath = basePath + modelParams.modelType + "/weights_manifest.json";
+  constructor() {
     this.modelParams = {
 		  flipHorizontal: true,
 		  outputStride: 16,
@@ -140,6 +139,8 @@ class ObjectDetection {
 		  scoreThreshold: 0.99,
 		  modelType: "ssdlitemobilenetv2"
 		}
+    this.modelPath = basePath + this.modelParams.modelType + "/tensorflowjs_model.pb";
+    this.weightPath = basePath + this.modelParams.modelType + "/weights_manifest.json";
   }
 
   async load() {
@@ -252,6 +253,11 @@ class ObjectDetection {
       this.model.dispose();
     }
   }
+}
+
+async function loadHandtrack() {
+  const objectDetection = new ObjectDetection();
+  return objectDetection.load();
 }
 
 // Function to save the canvas as example for training the model
